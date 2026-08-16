@@ -1118,22 +1118,49 @@ const selectionRate =
   )
 }).length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">
-              📋
-            </div>
+  <div className="empty-icon">
+    {hasSearch ? '🔎' : '📋'}
+  </div>
 
-            <h3>
-  {prioritySearch
-    ? `No ${prioritySearch} priority applications found`
-    : 'No applications found'}
-</h3>
+  <h3>
+    {prioritySearch
+      ? `No ${prioritySearch} priority applications found`
+      : hasSearch
+      ? 'No matching applications'
+      : 'No applications yet'}
+  </h3>
 
-            <p>
-              {hasSearch
-                ? 'Try changing your search filters.'
-                : 'Add your first job application to start tracking your job search.'}
-            </p>
-          </div>
+  <p>
+    {hasSearch
+      ? 'No applications match your current filters. Try changing your search criteria.'
+      : 'Add your first job application to start tracking your job search.'}
+  </p>
+
+  {hasSearch ? (
+    <button
+      className="empty-clear-button"
+      onClick={handleClearSearch}
+    >
+      Clear Filters
+    </button>
+  ) : (
+    <button
+      className="empty-add-button"
+      onClick={() => {
+        setEditingJob(null)
+        setCompany('')
+        setPosition('')
+        setStatus('Applied')
+        setLocation('')
+        setNotes('')
+        setPriority('Medium')
+        setShowForm(true)
+      }}
+    >
+      + Add Your First Job
+    </button>
+  )}
+</div>
         ) : (
           <div className="jobs-section">
             <div className="jobs-section-header">
@@ -1189,6 +1216,58 @@ const selectionRate =
                     >
                       {job.status}
                     </span>
+                    {job.status !== 'Rejected' && (
+  <div className="job-progress">
+    <div
+      className={`progress-step ${
+        ['Applied', 'Interview', 'Selected'].includes(job.status)
+          ? 'completed'
+          : ''
+      }`}
+    >
+      <span className="progress-dot">1</span>
+      <span>Applied</span>
+    </div>
+
+    <div
+      className={`progress-line ${
+        ['Interview', 'Selected'].includes(job.status)
+          ? 'completed'
+          : ''
+      }`}
+    />
+
+    <div
+      className={`progress-step ${
+        ['Interview', 'Selected'].includes(job.status)
+          ? 'completed'
+          : ''
+      }`}
+    >
+      <span className="progress-dot">2</span>
+      <span>Interview</span>
+    </div>
+
+    <div
+      className={`progress-line ${
+        job.status === 'Selected'
+          ? 'completed'
+          : ''
+      }`}
+    />
+
+    <div
+      className={`progress-step ${
+        job.status === 'Selected'
+          ? 'completed'
+          : ''
+      }`}
+    >
+      <span className="progress-dot">3</span>
+      <span>Selected</span>
+    </div>
+  </div>
+)}
                   </div>
 
                   <div className="job-details">
