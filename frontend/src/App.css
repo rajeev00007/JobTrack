@@ -2050,3 +2050,577 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================
+   SEARCH / FILTER AREA POLISH
+   ========================================= */
+
+.search-container {
+  position: relative;
+  padding: 22px;
+  margin-top: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.search-container::before {
+  content: 'FILTER APPLICATIONS';
+  display: block;
+  margin-bottom: 16px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.search-field {
+  gap: 7px;
+}
+
+.search-label {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.search-field input,
+.search-field select {
+  min-height: 42px;
+  border: 1px solid #dbe1ea;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #1e293b;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.search-field input::placeholder {
+  color: #94a3b8;
+}
+
+.search-field input:hover,
+.search-field select:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.search-field input:focus,
+.search-field select:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-actions {
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.search-actions button {
+  min-height: 42px;
+  border-radius: 10px;
+  font-weight: 700;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.search-actions button:first-child {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.search-actions button:first-child:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 7px 16px rgba(37, 99, 235, 0.18);
+}
+
+.search-actions button:last-child {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.search-actions button:last-child:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   SORT CONTROLS
+   ========================================= */
+
+.pagination-controls {
+  margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+}
+
+.pagination-controls label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-right: 8px;
+}
+
+.pagination-controls select {
+  min-height: 38px;
+  margin-right: 8px;
+  padding: 0 10px;
+  border: 1px solid #dbe1ea;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #334155;
+}
+
+.pagination-controls select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* =========================================
+   MOBILE FILTERS
+   ========================================= */
+
+@media (max-width: 700px) {
+  .search-container {
+    padding: 17px;
+  }
+
+  .search-actions {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .search-actions button {
+    flex: 1;
+  }
+
+  .pagination-controls {
+    padding: 13px;
+  }
+
+  .pagination-controls > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .pagination-controls select {
+    margin-right: 0;
+    flex: 1;
+    min-width: 130px;
+  }
+}
+/* =========================================
+   EMPTY STATES
+   ========================================= */
+
+.empty-state {
+  position: relative;
+  overflow: hidden;
+  padding: 58px 24px;
+  margin-top: 28px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+}
+
+.empty-state::before {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  top: -100px;
+  right: -70px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.empty-state::after {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  bottom: -85px;
+  left: -60px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.empty-icon {
+  position: relative;
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  font-size: 2rem;
+}
+
+.empty-state h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 9px;
+  font-size: 1.2rem;
+  font-weight: 750;
+  color: #1e293b;
+}
+
+.empty-state p {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  margin: 0 auto 22px;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.empty-add-button,
+.empty-clear-button {
+  position: relative;
+  z-index: 1;
+  min-height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.empty-add-button {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.empty-add-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 9px 20px rgba(37, 99, 235, 0.2);
+}
+
+.empty-clear-button {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.empty-clear-button:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   EMPTY STATE MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+  .empty-state {
+    padding: 45px 18px;
+  }
+
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 1.7rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.05rem;
+  }
+
+  .empty-state p {
+    font-size: 0.86rem;
+  }
+}
+/* =========================================
+   RESPONSIVE DASHBOARD
+   ========================================= */
+
+/* Tablet */
+@media (max-width: 900px) {
+  .dashboard {
+    width: 100%;
+  }
+
+  .dashboard-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .dashboard main {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .jobs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search-actions {
+    grid-column: 1 / -1;
+  }
+
+  .chart-card {
+    overflow: hidden;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .dashboard-header {
+    padding: 16px;
+  }
+
+  .dashboard main {
+    padding: 18px 16px 32px;
+  }
+
+  .brand-section {
+    gap: 10px;
+  }
+
+  .brand-section h1 {
+    font-size: 1.05rem;
+  }
+
+  .brand-section p {
+    font-size: 0.72rem;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+
+  .logout-button {
+    padding: 8px 11px;
+    font-size: 0.78rem;
+  }
+
+  .dashboard-title {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .dashboard-title h2 {
+    font-size: 1.45rem;
+  }
+
+  .add-job-button {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 76px;
+  }
+
+  .chart-card {
+    padding: 14px;
+  }
+
+  .chart-card h2 {
+    font-size: 1.1rem;
+  }
+
+  .search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding: 16px;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  .search-field input,
+  .search-field select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .search-actions {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .search-actions button {
+    flex: 1;
+  }
+
+  .pagination-controls {
+    padding: 12px;
+  }
+
+  .pagination-controls > div {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .pagination-controls label {
+    margin-right: 0;
+  }
+
+  .pagination-controls select {
+    width: 100%;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .jobs-section-header {
+    margin-bottom: 14px;
+  }
+
+  .jobs-section-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .job-card {
+    padding: 16px;
+  }
+
+  .job-card-top {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 11px;
+  }
+
+  .job-main-info {
+    min-width: 0;
+  }
+
+  .job-main-info h3 {
+    font-size: 0.98rem;
+  }
+
+  .company-name {
+    font-size: 0.82rem;
+  }
+
+  .status-badge {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: -4px;
+  }
+
+  .job-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .job-detail {
+    width: 100%;
+  }
+
+  .job-card-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .application-status-text {
+    font-size: 0.78rem;
+  }
+
+  .job-actions {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .edit-button,
+  .delete-button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .empty-state {
+    padding: 40px 18px;
+  }
+
+  .empty-state p {
+    max-width: 100%;
+  }
+
+  .job-form {
+    padding: 18px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .dashboard-header {
+    padding: 13px;
+  }
+
+  .dashboard main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .brand-section p {
+    display: none;
+  }
+
+  .logout-button {
+    padding: 7px 9px;
+  }
+
+  .dashboard-title h2 {
+    font-size: 1.3rem;
+  }
+
+  .stat-number {
+    font-size: 1.35rem;
+  }
+
+  .chart-card {
+    padding: 8px;
+  }
+
+  .job-card {
+    padding: 13px;
+  }
+}
