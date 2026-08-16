@@ -481,13 +481,24 @@ textarea {
   border-radius: 16px;
 
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.055);
-
+  cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
     border-color 0.2s ease;
+    
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
 }
 
+.stat-card-active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
 .stat-card::after {
   content: "";
 

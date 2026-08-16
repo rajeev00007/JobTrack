@@ -44,6 +44,7 @@ function Dashboard() {
   const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
   const [priority, setPriority] = useState('Medium')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const [companySearch, setCompanySearch] = useState('')
   const [statusSearch, setStatusSearch] = useState('')
@@ -115,6 +116,73 @@ const selectionRate =
         return 'status-default'
     }
   }
+   const handleStatusCardClick = async (selectedStatus) => {
+  setStatusFilter(selectedStatus)
+  setPage(0)
+
+  setCompanySearch('')
+  setLocationSearch('')
+  setPrioritySearch('')
+  setStatusSearch(selectedStatus)
+
+  try {
+    setLoading(true)
+    setError('')
+
+    const token = getToken()
+
+    let url
+
+    if (selectedStatus) {
+      const params = new URLSearchParams()
+      params.append('status', selectedStatus)
+
+      url = `${API_URL}/jobs/search?${params.toString()}`
+    } else {
+      const params = new URLSearchParams({
+        page: '0',
+        size: PAGE_SIZE.toString(),
+        sort: `${sortBy},${sortDirection}`,
+      })
+
+      url = `${API_URL}/jobs/page?${params.toString()}`
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || 'Failed to filter applications'
+      )
+    }
+
+    if (selectedStatus) {
+      const filteredJobs = Array.isArray(data) ? data : []
+
+      setJobs(filteredJobs)
+      setTotalPages(1)
+      setTotalElements(filteredJobs.length)
+    } else {
+      setJobs(data.content || [])
+      setPage(data.number ?? 0)
+      setTotalPages(data.totalPages ?? 0)
+      setTotalElements(data.totalElements ?? 0)
+    }
+  } catch (error) {
+    setError(error.message)
+    setJobs([])
+    setTotalPages(0)
+    setTotalElements(0)
+  } finally {
+    setLoading(false)
+  }
+}
 
   const getPriorityClass = (jobPriority) => {
     switch ((jobPriority || 'Medium').toLowerCase()) {
@@ -281,6 +349,8 @@ const selectionRate =
     setCompanySearch('')
     setStatusSearch('')
     setLocationSearch('')
+     setPrioritySearch('')
+  setStatusFilter('')
     setPage(0)
 
     try {
@@ -585,7 +655,12 @@ const selectionRate =
         </div>
 
         <div className="stats-container">
-          <div className="stat-card stat-card-total">
+          <div
+  className={`stat-card stat-card-total ${
+    statusFilter === '' ? 'stat-card-active' : ''
+  }`}
+  onClick={() => handleStatusCardClick('')}
+>
   <div className="stat-icon">📊</div>
 
   <div>
@@ -601,7 +676,12 @@ const selectionRate =
     </span>
   </div>
 </div>
-          <div className="stat-card stat-card-applied">
+          <div
+  className={`stat-card stat-card-applied ${
+    statusFilter === 'Applied' ? 'stat-card-active' : ''
+  }`}
+  onClick={() => handleStatusCardClick('Applied')}
+>
             <div className="stat-icon">
               A
             </div>
@@ -617,7 +697,12 @@ const selectionRate =
             </div>
           </div>
 
-          <div className="stat-card stat-card-interview">
+          <div
+  className={`stat-card stat-card-interview ${
+    statusFilter === 'Interview' ? 'stat-card-active' : ''
+  }`}
+  onClick={() => handleStatusCardClick('Interview')}
+>
             <div className="stat-icon">
               I
             </div>
@@ -633,7 +718,12 @@ const selectionRate =
             </div>
           </div>
 
-          <div className="stat-card stat-card-selected">
+          <div
+  className={`stat-card stat-card-selected ${
+    statusFilter === 'Selected' ? 'stat-card-active' : ''
+  }`}
+  onClick={() => handleStatusCardClick('Selected')}
+>
             <div className="stat-icon">
               ✓
             </div>
@@ -649,7 +739,12 @@ const selectionRate =
             </div>
           </div>
 
-          <div className="stat-card stat-card-rejected">
+         <div
+  className={`stat-card stat-card-rejected ${
+    statusFilter === 'Rejected' ? 'stat-card-active' : ''
+  }`}
+  onClick={() => handleStatusCardClick('Rejected')}
+> 
             <div className="stat-icon">
               R
             </div>
@@ -1229,7 +1324,7 @@ const selectionRate =
           </div>
         )}
 
-        {!hasSearch && (
+        {!hasSearch && !statusFilter && (
           <div className="pagination">
             <button
               disabled={page === 0}
