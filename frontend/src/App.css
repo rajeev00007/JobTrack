@@ -1698,3 +1698,16 @@ a:focus-visible {
     width: 100%;
   }
 }
+/* =========================
+   RATE STATISTICS
+========================= */
+
+.stat-card-interview-rate .stat-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stat-card-selection-rate .stat-icon {
+  background: #ecfeff;
+  color: #0891b2;
+}

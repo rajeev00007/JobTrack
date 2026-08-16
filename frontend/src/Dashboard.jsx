@@ -69,6 +69,21 @@ function Dashboard() {
     { name: 'Selected', value: stats.Selected },
     { name: 'Rejected', value: stats.Rejected },
   ]
+  const totalApplications =
+  stats.Applied +
+  stats.Interview +
+  stats.Selected +
+  stats.Rejected
+
+const interviewRate =
+  totalApplications > 0
+    ? Math.round((stats.Interview / totalApplications) * 100)
+    : 0
+
+const selectionRate =
+  totalApplications > 0
+    ? Math.round((stats.Selected / totalApplications) * 100)
+    : 0
 
   const showNotification = useCallback((message) => {
     setNotification(message)
@@ -631,6 +646,33 @@ function Dashboard() {
               </span>
             </div>
           </div>
+          <div className="stat-card stat-card-interview-rate">
+  <div className="stat-icon">%</div>
+
+  <div>
+    <span className="stat-number">
+      {interviewRate}%
+    </span>
+
+    <span className="stat-label">
+      Interview Rate
+    </span>
+  </div>
+</div>
+
+<div className="stat-card stat-card-selection-rate">
+  <div className="stat-icon">★</div>
+
+  <div>
+    <span className="stat-number">
+      {selectionRate}%
+    </span>
+
+    <span className="stat-label">
+      Selection Rate
+    </span>
+  </div>
+</div>
         </div>
 
         <div className="chart-card">
