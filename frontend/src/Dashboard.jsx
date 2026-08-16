@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+
+import { useCallback, useEffect, useState } from 'react'
 import './app.css'
 import {
   PieChart,
@@ -8,6 +9,24 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+
+const API_URL = 'http://localhost:8080'
+
+const EMPTY_STATS = {
+  Applied: 0,
+  Interview: 0,
+  Selected: 0,
+  Rejected: 0,
+}
+
+const PAGE_SIZE = 5
+
+const CHART_COLORS = [
+  '#2563eb',
+  '#f59e0b',
+  '#16a34a',
+  '#dc2626',
+]
 
 function Dashboard() {
   const [jobs, setJobs] = useState([])
@@ -36,12 +55,12 @@ function Dashboard() {
   const [sortBy, setSortBy] = useState('id')
   const [sortDirection, setSortDirection] = useState('desc')
 
-  const [stats, setStats] = useState({
-    Applied: 0,
-    Interview: 0,
-    Selected: 0,
-    Rejected: 0,
-  })
+  const [stats, setStats] = useState(EMPTY_STATS)
+
+  const hasSearch =
+    companySearch.trim() ||
+    statusSearch.trim() ||
+    locationSearch.trim()
 
   const chartData = [
     { name: 'Applied', value: stats.Applied },
@@ -50,12 +69,49 @@ function Dashboard() {
     { name: 'Rejected', value: stats.Rejected },
   ]
 
-  const showNotification = (message) => {
+  const showNotification = useCallback((message) => {
     setNotification(message)
 
     setTimeout(() => {
       setNotification('')
     }, 3000)
+  }, [])
+
+  const getToken = () => localStorage.getItem('token')
+
+  const getStatusClass = (jobStatus) => {
+    switch (jobStatus) {
+      case 'Applied':
+        return 'status-applied'
+
+      case 'Interview':
+        return 'status-interview'
+
+      case 'Selected':
+        return 'status-selected'
+
+      case 'Rejected':
+        return 'status-rejected'
+
+      default:
+        return 'status-default'
+    }
+  }
+
+  const getPriorityClass = (jobPriority) => {
+    switch ((jobPriority || 'Medium').toLowerCase()) {
+      case 'high':
+        return 'priority-high'
+
+      case 'medium':
+        return 'priority-medium'
+
+      case 'low':
+        return 'priority-low'
+
+      default:
+        return 'priority-medium'
+    }
   }
 
   const formatDate = (dateValue) => {
@@ -76,95 +132,11 @@ function Dashboard() {
     })
   }
 
-  const getStatusClass = (jobStatus) => {
-    switch (jobStatus) {
-      case 'Applied':
-        return 'status-applied'
-      case 'Interview':
-        return 'status-interview'
-      case 'Selected':
-        return 'status-selected'
-      case 'Rejected':
-        return 'status-rejected'
-      default:
-        return 'status-default'
-    }
-  }
-
-  const fetchJobs = async (pageNumber = page) => {
-    const token = localStorage.getItem('token')
+  const fetchStats = useCallback(async () => {
+    const token = getToken()
 
     try {
-      setLoading(true)
-      setError('')
-
-      const hasSearch =
-        companySearch.trim() ||
-        statusSearch.trim() ||
-        locationSearch.trim()
-
-      let url
-
-      if (hasSearch) {
-        const params = new URLSearchParams()
-
-        if (companySearch.trim()) {
-          params.append('company', companySearch.trim())
-        }
-
-        if (statusSearch.trim()) {
-          params.append('status', statusSearch.trim())
-        }
-
-        if (locationSearch.trim()) {
-          params.append('location', locationSearch.trim())
-        }
-
-        url = `http://localhost:8080/jobs/search?${params.toString()}`
-      } else {
-        url =
-          `http://localhost:8080/jobs/page` +
-          `?page=${pageNumber}` +
-          `&size=5` +
-          `&sort=${sortBy},${sortDirection}`
-      }
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      const data = await response.json()
-
-      console.log('JOB DATA:', data)
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch jobs')
-      }
-
-      if (hasSearch) {
-        setJobs(data)
-        setTotalPages(1)
-        setTotalElements(data.length)
-      } else {
-        setJobs(data.content)
-        setPage(data.number)
-        setTotalPages(data.totalPages)
-        setTotalElements(data.totalElements)
-      }
-    } catch (error) {
-      setError(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchStats = async () => {
-    const token = localStorage.getItem('token')
-
-    try {
-      const response = await fetch('http://localhost:8080/jobs', {
+      const response = await fetch(`${API_URL}/jobs`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -173,19 +145,18 @@ function Dashboard() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch job statistics')
+        throw new Error(
+          data.message || 'Failed to fetch job statistics'
+        )
       }
 
       const newStats = {
-        Applied: 0,
-        Interview: 0,
-        Selected: 0,
-        Rejected: 0,
+        ...EMPTY_STATS,
       }
 
       data.forEach((job) => {
         if (newStats[job.status] !== undefined) {
-          newStats[job.status]++
+          newStats[job.status] += 1
         }
       })
 
@@ -193,27 +164,145 @@ function Dashboard() {
     } catch (error) {
       setError(error.message)
     }
-  }
+  }, [])
+
+  const fetchJobs = useCallback(
+    async (pageNumber = page) => {
+      const token = getToken()
+
+      try {
+        setLoading(true)
+        setError('')
+
+        let url
+
+        if (hasSearch) {
+          const params = new URLSearchParams()
+
+          if (companySearch.trim()) {
+            params.append('company', companySearch.trim())
+          }
+
+          if (statusSearch.trim()) {
+            params.append('status', statusSearch.trim())
+          }
+
+          if (locationSearch.trim()) {
+            params.append('location', locationSearch.trim())
+          }
+
+          url = `${API_URL}/jobs/search?${params.toString()}`
+        } else {
+          const params = new URLSearchParams({
+            page: pageNumber.toString(),
+            size: PAGE_SIZE.toString(),
+            sort: `${sortBy},${sortDirection}`,
+          })
+
+          url = `${API_URL}/jobs/page?${params.toString()}`
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || 'Failed to fetch jobs'
+          )
+        }
+
+        if (hasSearch) {
+          setJobs(Array.isArray(data) ? data : [])
+          setTotalPages(1)
+          setTotalElements(
+            Array.isArray(data) ? data.length : 0
+          )
+        } else {
+          setJobs(data.content || [])
+          setPage(data.number ?? pageNumber)
+          setTotalPages(data.totalPages ?? 0)
+          setTotalElements(data.totalElements ?? 0)
+        }
+      } catch (error) {
+        setError(error.message)
+        setJobs([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      page,
+      sortBy,
+      sortDirection,
+      companySearch,
+      statusSearch,
+      locationSearch,
+      hasSearch,
+    ]
+  )
 
   useEffect(() => {
     fetchJobs(page)
-    fetchStats()
   }, [page, sortBy, sortDirection])
 
-  const handleSearch = () => {
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
+
+  const handleSearch = async () => {
     setPage(0)
-    fetchJobs(0)
+    await fetchJobs(0)
   }
 
-  const handleClearSearch = () => {
+  const handleClearSearch = async () => {
     setCompanySearch('')
     setStatusSearch('')
     setLocationSearch('')
     setPage(0)
 
-    setTimeout(() => {
-      fetchJobs(0)
-    }, 0)
+    try {
+      setLoading(true)
+      setError('')
+
+      const token = getToken()
+
+      const params = new URLSearchParams({
+        page: '0',
+        size: PAGE_SIZE.toString(),
+        sort: `${sortBy},${sortDirection}`,
+      })
+
+      const response = await fetch(
+        `${API_URL}/jobs/page?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || 'Failed to fetch jobs'
+        )
+      }
+
+      setJobs(data.content || [])
+      setPage(data.number ?? 0)
+      setTotalPages(data.totalPages ?? 0)
+      setTotalElements(data.totalElements ?? 0)
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const resetForm = () => {
@@ -231,21 +320,21 @@ function Dashboard() {
     event.preventDefault()
     setError('')
 
-    const token = localStorage.getItem('token')
+    const token = getToken()
 
     try {
-      const response = await fetch('http://localhost:8080/jobs', {
+      const response = await fetch(`${API_URL}/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          company,
-          position,
+          company: company.trim(),
+          position: position.trim(),
           status,
-          location,
-          notes,
+          location: location.trim(),
+          notes: notes.trim(),
           priority,
         }),
       })
@@ -253,15 +342,19 @@ function Dashboard() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create job')
+        throw new Error(
+          data.message || 'Failed to create job'
+        )
       }
 
       resetForm()
 
-      await fetchJobs(page)
+      await fetchJobs(0)
       await fetchStats()
 
-      showNotification('Application added successfully!')
+      showNotification(
+        'Application added successfully!'
+      )
     } catch (error) {
       setError(error.message)
     }
@@ -278,17 +371,27 @@ function Dashboard() {
     setPriority(job.priority || 'Medium')
 
     setShowForm(true)
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
   }
 
   const handleUpdateJob = async (event) => {
     event.preventDefault()
+
+    if (!editingJob) {
+      return
+    }
+
     setError('')
 
-    const token = localStorage.getItem('token')
+    const token = getToken()
 
     try {
       const response = await fetch(
-        `http://localhost:8080/jobs/${editingJob.id}`,
+        `${API_URL}/jobs/${editingJob.id}`,
         {
           method: 'PUT',
           headers: {
@@ -296,11 +399,11 @@ function Dashboard() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            company,
-            position,
+            company: company.trim(),
+            position: position.trim(),
             status,
-            location,
-            notes,
+            location: location.trim(),
+            notes: notes.trim(),
             priority,
           }),
         }
@@ -309,7 +412,9 @@ function Dashboard() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update job')
+        throw new Error(
+          data.message || 'Failed to update job'
+        )
       }
 
       resetForm()
@@ -317,7 +422,9 @@ function Dashboard() {
       await fetchJobs(page)
       await fetchStats()
 
-      showNotification('Application updated successfully!')
+      showNotification(
+        'Application updated successfully!'
+      )
     } catch (error) {
       setError(error.message)
     }
@@ -334,11 +441,11 @@ function Dashboard() {
 
     setError('')
 
-    const token = localStorage.getItem('token')
+    const token = getToken()
 
     try {
       const response = await fetch(
-        `http://localhost:8080/jobs/${id}`,
+        `${API_URL}/jobs/${id}`,
         {
           method: 'DELETE',
           headers: {
@@ -349,13 +456,25 @@ function Dashboard() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.message || 'Failed to delete job')
+
+        throw new Error(
+          data.message || 'Failed to delete job'
+        )
       }
 
-      await fetchJobs(page)
+      let nextPage = page
+
+      if (jobs.length === 1 && page > 0) {
+        nextPage = page - 1
+        setPage(nextPage)
+      }
+
+      await fetchJobs(nextPage)
       await fetchStats()
 
-      showNotification('Application deleted successfully!')
+      showNotification(
+        'Application deleted successfully!'
+      )
     } catch (error) {
       setError(error.message)
     }
@@ -364,6 +483,16 @@ function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     window.location.reload()
+  }
+
+  const handleSortChange = (event) => {
+    setPage(0)
+    setSortBy(event.target.value)
+  }
+
+  const handleSortDirectionChange = (event) => {
+    setPage(0)
+    setSortDirection(event.target.value)
   }
 
   if (loading) {
@@ -379,7 +508,9 @@ function Dashboard() {
     <div className="dashboard">
       <header className="dashboard-header">
         <div className="brand-section">
-          <div className="brand-icon">J</div>
+          <div className="brand-icon">
+            J
+          </div>
 
           <div>
             <h1>JobTrack</h1>
@@ -398,7 +529,10 @@ function Dashboard() {
       <main>
         {notification && (
           <div className="success-notification">
-            <span className="notification-icon">✓</span>
+            <span className="notification-icon">
+              ✓
+            </span>
+
             {notification}
           </div>
         )}
@@ -423,6 +557,7 @@ function Dashboard() {
               if (showForm) {
                 resetForm()
               } else {
+                setEditingJob(null)
                 setShowForm(true)
               }
             }}
@@ -433,7 +568,9 @@ function Dashboard() {
 
         <div className="stats-container">
           <div className="stat-card stat-card-applied">
-            <div className="stat-icon">A</div>
+            <div className="stat-icon">
+              A
+            </div>
 
             <div>
               <span className="stat-number">
@@ -447,7 +584,9 @@ function Dashboard() {
           </div>
 
           <div className="stat-card stat-card-interview">
-            <div className="stat-icon">I</div>
+            <div className="stat-icon">
+              I
+            </div>
 
             <div>
               <span className="stat-number">
@@ -461,7 +600,9 @@ function Dashboard() {
           </div>
 
           <div className="stat-card stat-card-selected">
-            <div className="stat-icon">✓</div>
+            <div className="stat-icon">
+              ✓
+            </div>
 
             <div>
               <span className="stat-number">
@@ -475,7 +616,9 @@ function Dashboard() {
           </div>
 
           <div className="stat-card stat-card-rejected">
-            <div className="stat-icon">R</div>
+            <div className="stat-icon">
+              R
+            </div>
 
             <div>
               <span className="stat-number">
@@ -515,7 +658,10 @@ function Dashboard() {
                 label
               >
                 {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} />
+                  <Cell
+                    key={`cell-${entry.name}`}
+                    fill={CHART_COLORS[index]}
+                  />
                 ))}
               </Pie>
 
@@ -538,6 +684,11 @@ function Dashboard() {
               onChange={(event) =>
                 setCompanySearch(event.target.value)
               }
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  handleSearch()
+                }
+              }}
             />
           </div>
 
@@ -586,6 +737,11 @@ function Dashboard() {
               onChange={(event) =>
                 setLocationSearch(event.target.value)
               }
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  handleSearch()
+                }
+              }}
             />
           </div>
 
@@ -606,10 +762,7 @@ function Dashboard() {
 
             <select
               value={sortBy}
-              onChange={(event) => {
-                setPage(0)
-                setSortBy(event.target.value)
-              }}
+              onChange={handleSortChange}
             >
               <option value="id">
                 Date Added
@@ -634,10 +787,7 @@ function Dashboard() {
 
             <select
               value={sortDirection}
-              onChange={(event) => {
-                setPage(0)
-                setSortDirection(event.target.value)
-              }}
+              onChange={handleSortDirectionChange}
             >
               <option value="desc">
                 Descending
@@ -782,8 +932,9 @@ function Dashboard() {
             <h3>No applications found</h3>
 
             <p>
-              Add your first job application to
-              start tracking your job search.
+              {hasSearch
+                ? 'Try changing your search filters.'
+                : 'Add your first job application to start tracking your job search.'}
             </p>
           </div>
         ) : (
@@ -832,16 +983,14 @@ function Dashboard() {
                     </span>
                   </div>
 
-                  {/* JOB DETAILS */}
                   <div className="job-details">
-                    {/* Location */}
-                    <div className="job-detail">
+                    <div className="job-detail job-location">
                       <span className="detail-icon">
                         📍
                       </span>
 
                       <div>
-                        <span className="detail-label job-location">
+                        <span className="detail-label">
                           Location
                         </span>
 
@@ -852,7 +1001,22 @@ function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Notes */}
+                    <div className="job-detail job-id">
+                      <span className="detail-icon">
+                        #
+                      </span>
+
+                      <div>
+                        <span className="detail-label">
+                          Application ID
+                        </span>
+
+                        <strong>
+                          #{job.id}
+                        </strong>
+                      </div>
+                    </div>
+
                     {job.notes && (
                       <div className="job-detail job-notes">
                         <span className="detail-icon">
@@ -871,24 +1035,6 @@ function Dashboard() {
                       </div>
                     )}
 
-                    {/* Application ID */}
-                    <div className="job-detail job-id">
-                      <span className="detail-icon">
-                        #
-                      </span>
-
-                      <div>
-                        <span className="detail-label">
-                          Application ID
-                        </span>
-
-                        <strong>
-                          #{job.id}
-                        </strong>
-                      </div>
-                    </div>
-
-                    {/* Date Added */}
                     <div className="job-detail job-date">
                       <span className="detail-icon">
                         📅
@@ -909,7 +1055,6 @@ function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Priority */}
                     <div className="job-detail job-priority">
                       <span className="detail-icon">
                         ⭐
@@ -921,9 +1066,9 @@ function Dashboard() {
                         </span>
 
                         <strong
-                          className={`priority-text priority-${(
-                            job.priority || 'Medium'
-                          ).toLowerCase()}`}
+                          className={`priority-text ${getPriorityClass(
+                            job.priority
+                          )}`}
                         >
                           {job.priority || 'Medium'}
                         </strong>
@@ -931,7 +1076,6 @@ function Dashboard() {
                     </div>
                   </div>
 
-                  {/* FOOTER */}
                   <div className="job-card-footer">
                     <span className="application-status-text">
                       {job.status === 'Selected'
@@ -945,6 +1089,7 @@ function Dashboard() {
 
                     <div className="job-actions">
                       <button
+                        type="button"
                         className="edit-button"
                         onClick={() =>
                           handleEditClick(job)
@@ -954,6 +1099,7 @@ function Dashboard() {
                       </button>
 
                       <button
+                        type="button"
                         className="delete-button"
                         onClick={() =>
                           handleDeleteJob(job.id)
@@ -969,41 +1115,42 @@ function Dashboard() {
           </div>
         )}
 
-        {/* PAGINATION */}
-        {!companySearch &&
-          !statusSearch &&
-          !locationSearch && (
-            <div className="pagination">
-              <button
-                disabled={page === 0}
-                onClick={() =>
-                  setPage(page - 1)
-                }
-              >
-                ← Previous
-              </button>
+        {!hasSearch && (
+          <div className="pagination">
+            <button
+              disabled={page === 0}
+              onClick={() =>
+                setPage((currentPage) =>
+                  Math.max(currentPage - 1, 0)
+                )
+              }
+            >
+              ← Previous
+            </button>
 
-              <span>
-                Page {page + 1} of{' '}
-                {Math.max(totalPages, 1)}
-              </span>
+            <span>
+              Page {page + 1} of{' '}
+              {Math.max(totalPages, 1)}
+            </span>
 
-              <button
-                disabled={
-                  totalPages === 0 ||
-                  page >= totalPages - 1
-                }
-                onClick={() =>
-                  setPage(page + 1)
-                }
-              >
-                Next →
-              </button>
-            </div>
-          )}
+            <button
+              disabled={
+                totalPages === 0 ||
+                page >= totalPages - 1
+              }
+              onClick={() =>
+                setPage((currentPage) =>
+                  currentPage + 1
+                )
+              }
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </main>
     </div>
   )
 }
-
 export default Dashboard
+
