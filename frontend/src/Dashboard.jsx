@@ -48,6 +48,7 @@ function Dashboard() {
   const [companySearch, setCompanySearch] = useState('')
   const [statusSearch, setStatusSearch] = useState('')
   const [locationSearch, setLocationSearch] = useState('')
+  const [prioritySearch, setPrioritySearch] = useState('')
 
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -61,7 +62,8 @@ function Dashboard() {
   const hasSearch =
     companySearch.trim() ||
     statusSearch.trim() ||
-    locationSearch.trim()
+    locationSearch.trim() ||
+     prioritySearch.trim()
 
   const chartData = [
     { name: 'Applied', value: stats.Applied },
@@ -787,6 +789,34 @@ const selectionRate =
               }}
             />
           </div>
+          <div className="search-field">
+  <span className="search-label">
+    Priority
+  </span>
+
+  <select
+    value={prioritySearch}
+    onChange={(event) =>
+      setPrioritySearch(event.target.value)
+    }
+  >
+    <option value="">
+      All Priorities
+    </option>
+
+    <option value="High">
+      High
+    </option>
+
+    <option value="Medium">
+      Medium
+    </option>
+
+    <option value="Low">
+      Low
+    </option>
+  </select>
+</div>
 
           <div className="search-actions">
             <button onClick={handleSearch}>
@@ -993,7 +1023,18 @@ const selectionRate =
             </div>
 
             <div className="jobs-grid">
-              {jobs.map((job) => (
+              {jobs
+  .filter((job) => {
+    if (!prioritySearch) {
+      return true
+    }
+
+    return (
+      (job.priority || 'Medium').toLowerCase() ===
+      prioritySearch.toLowerCase()
+    )
+  })
+  .map((job) => (
                 <div
                   className="job-card"
                   key={job.id}
