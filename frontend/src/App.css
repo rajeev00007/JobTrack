@@ -1725,3 +1725,154 @@ a:focus-visible {
   background: #ecfeff;
   color: #0891b2;
 }
+/* =========================================
+   JOB CARD POLISH
+   ========================================= */
+
+.job-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.job-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #2563eb;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.11);
+  border-color: #dbe3ef;
+}
+
+.job-card:hover::before {
+  opacity: 1;
+}
+
+.job-main-info h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 5px;
+}
+
+.company-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.status-badge {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.job-details {
+  gap: 12px;
+}
+
+.job-detail {
+  min-width: 0;
+}
+
+.job-detail strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.detail-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.job-notes strong {
+  color: #475569;
+  font-weight: 500;
+}
+
+.priority-text {
+  font-weight: 800;
+}
+
+.job-card-footer {
+  margin-top: 18px;
+  padding-top: 16px;
+}
+
+.application-status-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.job-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-button,
+.delete-button {
+  min-width: 72px;
+  font-weight: 700;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.edit-button:hover,
+.delete-button:hover {
+  transform: translateY(-1px);
+}
+
+.edit-button:active,
+.delete-button:active {
+  transform: translateY(0);
+}
+
+/* Better mobile layout */
+@media (max-width: 700px) {
+  .job-card-top {
+    align-items: flex-start;
+  }
+
+  .status-badge {
+    font-size: 0.72rem;
+  }
+
+  .job-details {
+    grid-template-columns: 1fr;
+  }
+
+  .job-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .job-actions {
+    width: 100%;
+  }
+
+  .edit-button,
+  .delete-button {
+    flex: 1;
+  }
+}
