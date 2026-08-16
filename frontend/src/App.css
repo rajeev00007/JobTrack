@@ -550,7 +550,10 @@ textarea {
   font-size: 12px;
   font-weight: 600;
 }
-
+.stat-card-total .stat-icon {
+  background: #f3f4f6;
+  color: #4b5563;
+}
 .stat-card-applied .stat-icon {
   background: #eff6ff;
   color: #2563eb;

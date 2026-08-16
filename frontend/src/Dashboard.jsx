@@ -585,6 +585,22 @@ const selectionRate =
         </div>
 
         <div className="stats-container">
+          <div className="stat-card stat-card-total">
+  <div className="stat-icon">📊</div>
+
+  <div>
+    <span className="stat-number">
+      {stats.Applied +
+        stats.Interview +
+        stats.Selected +
+        stats.Rejected}
+    </span>
+
+    <span className="stat-label">
+      Total Applications
+    </span>
+  </div>
+</div>
           <div className="stat-card stat-card-applied">
             <div className="stat-icon">
               A
@@ -996,13 +1012,26 @@ const selectionRate =
           </p>
         )}
 
-        {jobs.length === 0 ? (
+        {jobs.filter((job) => {
+  if (!prioritySearch) {
+    return true
+  }
+
+  return (
+    (job.priority || 'Medium').toLowerCase() ===
+    prioritySearch.toLowerCase()
+  )
+}).length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
               📋
             </div>
 
-            <h3>No applications found</h3>
+            <h3>
+  {prioritySearch
+    ? `No ${prioritySearch} priority applications found`
+    : 'No applications found'}
+</h3>
 
             <p>
               {hasSearch
