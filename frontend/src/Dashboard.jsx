@@ -36,6 +36,7 @@ function Dashboard() {
 
   const [showForm, setShowForm] = useState(false)
   const [editingJob, setEditingJob] = useState(null)
+  const [viewingJob, setViewingJob] = useState(null)
 
   const [company, setCompany] = useState('')
   const [position, setPosition] = useState('')
@@ -1087,27 +1088,28 @@ function Dashboard() {
                         : 'Application active'}
                     </span>
 
-                    <div className="job-actions">
-                      <button
-                        type="button"
-                        className="edit-button"
-                        onClick={() =>
-                          handleEditClick(job)
-                        }
-                      >
-                        Edit
-                      </button>
+                   <div className="job-actions">
+  <button
+    className="view-button"
+    onClick={() => setViewingJob(job)}
+  >
+    View
+  </button>
 
-                      <button
-                        type="button"
-                        className="delete-button"
-                        onClick={() =>
-                          handleDeleteJob(job.id)
-                        }
-                      >
-                        Delete
-                      </button>
-                    </div>
+  <button
+    className="edit-button"
+    onClick={() => handleEditClick(job)}
+  >
+    Edit
+  </button>
+
+  <button
+    className="delete-button"
+    onClick={() => handleDeleteJob(job.id)}
+  >
+    Delete
+  </button>
+</div>
                   </div>
                 </div>
               ))}
@@ -1148,6 +1150,136 @@ function Dashboard() {
             </button>
           </div>
         )}
+        {viewingJob && (
+  <div
+    className="job-modal-overlay"
+    onClick={() => setViewingJob(null)}
+  >
+    <div
+      className="job-modal"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <div className="job-modal-header">
+        <div>
+          <span className="section-label">
+            APPLICATION DETAILS
+          </span>
+
+          <h2>{viewingJob.position}</h2>
+
+          <p>{viewingJob.company}</p>
+        </div>
+
+        <button
+          className="modal-close-button"
+          onClick={() => setViewingJob(null)}
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="job-modal-status">
+        <span
+          className={`status-badge ${getStatusClass(
+            viewingJob.status
+          )}`}
+        >
+          {viewingJob.status}
+        </span>
+      </div>
+
+      <div className="job-modal-details">
+        <div className="modal-detail">
+          <span className="detail-label">
+            Location
+          </span>
+
+          <strong>
+            {viewingJob.location || 'Not specified'}
+          </strong>
+        </div>
+
+        <div className="modal-detail">
+          <span className="detail-label">
+            Priority
+          </span>
+
+          <strong
+            className={`priority-text priority-${(
+              viewingJob.priority || 'Medium'
+            ).toLowerCase()}`}
+          >
+            {viewingJob.priority || 'Medium'}
+          </strong>
+        </div>
+
+        <div className="modal-detail">
+          <span className="detail-label">
+            Application ID
+          </span>
+
+          <strong>#{viewingJob.id}</strong>
+        </div>
+
+        <div className="modal-detail">
+          <span className="detail-label">
+            Date Added
+          </span>
+
+          <strong>
+            {formatDate(
+              viewingJob.createdAt ||
+                viewingJob.createdDate ||
+                viewingJob.dateCreated
+            )}
+          </strong>
+        </div>
+
+        <div className="modal-detail modal-detail-full">
+          <span className="detail-label">
+            Notes
+          </span>
+
+          <div className="modal-notes">
+            {viewingJob.notes
+              ? viewingJob.notes
+              : 'No notes added for this application.'}
+          </div>
+        </div>
+      </div>
+
+      <div className="job-modal-footer">
+        <button
+          className="edit-button"
+          onClick={() => {
+            setViewingJob(null)
+            handleEditClick(viewingJob)
+          }}
+        >
+          Edit Application
+        </button>
+
+        <button
+          className="delete-button"
+          onClick={() => {
+            const jobId = viewingJob.id
+            setViewingJob(null)
+            handleDeleteJob(jobId)
+          }}
+        >
+          Delete Application
+        </button>
+
+        <button
+          className="modal-cancel-button"
+          onClick={() => setViewingJob(null)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </main>
     </div>
   )
